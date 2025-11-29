@@ -15,12 +15,12 @@
 ## Structs, Methods, & Composition
 
 ### L1: Define data models and attach logic.
-- [ ] **Syntax:** I can define a `struct` with typed fields and instantiate it using both struct literals and the `var` keyword.
-- [ ] **Pointers:** I understand the difference between a value variable (`t`) and a pointer variable (`&t`), and I can dereference a pointer (`*p`) to access the underlying value.
-- [ ] **Receivers:** I can declare methods on types. I know the syntax difference between a Value Receiver (`func (s MyStruct)`) and a Pointer Receiver (`func (s *MyStruct)`).
-- [ ] **Visibility:** I can control field and method access (public vs. private) across packages using capitalization.
-- [ ] **Embedding:** I can use anonymous fields (struct embedding) to "borrow" fields and methods from one struct into another.
-- [ ] **Constructors:** I can implement "Constructor" functions (e.g., `NewUser()`) to initialize structs with default values, since Go lacks built-in constructors.
+- [x] **Syntax:** I can define a `struct` with typed fields and instantiate it using both struct literals and the `var` keyword.
+- [x] **Pointers:** I understand the difference between a value variable (`t`) and a pointer variable (`&t`), and I can dereference a pointer (`*p`) to access the underlying value.
+- [x] **Receivers:** I can declare methods on types. I know the syntax difference between a Value Receiver (`func (s MyStruct)`) and a Pointer Receiver (`func (s *MyStruct)`).
+- [x] **Visibility:** I can control field and method access (public vs. private) across packages using capitalization.
+- [x] **Embedding:** I can use anonymous fields (struct embedding) to "borrow" fields and methods from one struct into another.
+- [x] **Constructors:** I can implement "Constructor" functions (e.g., `NewUser()`) to initialize structs with default values, since Go lacks built-in constructors.
 
 ### L2: Idiomatic, concurrency-safe, API-stable.
 - [ ] **Semantics:** I can decide between Value Receivers and Pointer Receivers based on semantics (Mutation vs. Immutability) rather than just "performance."
