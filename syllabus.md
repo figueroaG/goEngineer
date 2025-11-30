@@ -96,11 +96,11 @@
 ## Interfaces
 
 ### L1: Polymorphic code using shared behaviors.
-- [ ] **Syntax:** I can define an `interface` with method signatures and implement it implicitly by defining those methods on a concrete type (no `implements` keyword).
-- [ ] **Polymorphism:** I can write a function that accepts an interface type (e.g., `func Speak(s Speaker)`) and pass different concrete structs that satisfy it.
-- [ ] **Type Assertion:** I can extract the concrete value from an interface using `val, ok := i.(ConcreteType)` and handle the failure case safely.
-- [ ] **Type Switches:** I can use a `switch v := i.(type)` block to handle multiple possible concrete types stored within an interface variable.
-- [ ] **The Empty Interface:** I understand `interface{}` (or `any` in Go 1.18+) represents "zero methods," meaning _all_ types satisfy it.
+- [x] **Syntax:** I can define an `interface` with method signatures and implement it implicitly by defining those methods on a concrete type.
+- [x] **Polymorphism:** I can write a function that accepts an interface type (e.g., `func Speak(s Speaker)`) and pass different concrete structs that satisfy it.
+- [x] **Type Assertion:** I can extract the concrete value from an interface using `val, ok := i.(ConcreteType)` and handle the failure case safely.
+- [x] **Type Switches:** I can use a `switch v := i.(type)` block to handle multiple possible concrete types stored within an interface variable.
+- [x] **The Empty Interface:** I understand `interface{}` (or `any` in Go 1.18+) represents "zero methods," meaning _all_ types satisfy it.
 
 ### L2: Decoupled systems; avoid "Interface Pollution."
 - [ ] **Golden Rule:** I practice the Proverb: **"Accept Interfaces, Return Structs."** I design functions to ask for the minimum behavior they need, but return concrete types to give callers flexibility.
