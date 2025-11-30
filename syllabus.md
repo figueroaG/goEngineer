@@ -69,11 +69,11 @@
 ## Maps & Hash Collisions
 
 ### L1: Store and retrieve key-value pairs correctly.
-- [ ] **Syntax:** I can initialize maps using `make(map[K]V)` vs literal syntax, and I know that writing to a `nil` map causes a panic.
-- [ ] **Access:** I can retrieve values and strictly use the "Comma-Ok" idiom (`val, ok := m[key]`) to distinguish between a "missing key" and a "zero-value" entry.
-- [ ] **Manipulation:** I can add entries, use the `delete(m, key)` function, and iterate over maps using `range`.
-- [ ] **Iteration Order:** I understand that map iteration order is **randomized** intentionally by the runtime and I never write code that relies on the order of keys.
-- [ ] **Key Constraints:** I know that map keys must be **comparable** (types that support `==`), meaning I cannot use Slices, Maps, or Functions as keys.
+- [x] **Syntax:** I can initialize maps using `make(map[K]V)` vs literal syntax, and I know that writing to a `nil` map causes a panic.
+- [x] **Access:** I can retrieve values and strictly use the "Comma-Ok" idiom (`val, ok := m[key]`) to distinguish between a "missing key" and a "zero-value" entry.
+- [x] **Manipulation:** I can add entries, use the `delete(m, key)` function, and iterate over maps using `range`.
+- [x] **Iteration Order:** I understand that map iteration order is **randomized** intentionally by the runtime and I never write code that relies on the order of keys.
+- [x] **Key Constraints:** I know that map keys must be **comparable** (types that support `==`), meaning I cannot use Slices, Maps, or Functions as keys.
 
 ### L2: Concurrency-safe code; optimize access patterns.
 - [ ] **Concurrency Safety:** I know that standard maps are **not thread-safe** for concurrent read/write. I can prevent "concurrent map writes" panics using `sync.RWMutex`.
