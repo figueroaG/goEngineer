@@ -43,11 +43,11 @@
 ## Slice vs. Array
 
 ### L1: Use collections to store data without crashing.
-- [ ] **Syntax:** I can declare a fixed-size array (`var a [5]int`) versus a dynamic slice (`var s []int`), and I know that `[5]int` and `[4]int` are completely different types.
-- [ ] **Semantics:** I understand that assigning an array copies **all** its data (Value Semantics), whereas assigning a slice only copies the "Header" (Pointer Semantics).
-- [ ] **Manipulation:** I can use `append()` to grow a slice and `len()`/`cap()` to inspect it.
-- [ ] **Construction:** I can use `make([]T, len, cap)` to initialize a slice with specific dimensions.
-- [ ] **Slicing:** I can create a "view" into an existing array or slice using the `[low:high]` syntax (e.g., `s[1:4]`).
+- [x] **Syntax:** I can declare a fixed-size array (`var a [5]int`) versus a dynamic slice (`var s []int`), and I know that `[5]int` and `[4]int` are completely different types.
+- [x] **Semantics:** I understand that assigning an array copies **all** its data (Value Semantics), whereas assigning a slice only copies the "Header" (Pointer Semantics).
+- [x] **Manipulation:** I can use `append()` to grow a slice and `len()`/`cap()` to inspect it.
+- [x] **Construction:** I can use `make([]T, len, cap)` to initialize a slice with specific dimensions.
+- [x] **Slicing:** I can create a "view" into an existing array or slice using the `[low:high]` syntax (e.g., `s[1:4]`).
 
 ### L2: Optimize allocation efficiency and prevent leaks.
 - [ ] **Pre-allocation:** I can prevent performance-killing reallocation loops by pre-calculating capacity: `make([]T, 0, expectedSize)`.
@@ -624,7 +624,7 @@
 
 - [ ] **The Interface Structure:** Draw the two-word pair (type pointer, data pointer). Show what happens in memory when you assign a \*User struct to an io.Reader interface. (Illustrates: Why interfaces allocate/escape).
 - [ ] **The Slice Header vs. Array:** Draw the 3-word slice header pointing to a backing array. Show what happens to the header when you pass it to a function vs. what happens to the array. (Illustrates: Value semantics of the header, Reference semantics of the data).
-- [ ] **GMP Scheduler Model:** Draw the G (Goroutine), M (OS Thread), and P (Processor). Draw the Local Run Queue attached to the P and the Global Run Queue. (Illustrates: Work stealing and why GOMAXPROCS matters).
+- [ ] **GMP Scheduler Model:** Draw the G (Goroutine), M (OS Thread), and P (Processor). Draw the Local Run Queue attached to the P and the Global Run Queue. (Illustrates: Work stealing aL!nd why GOMAXPROCS matters).
 - [ ] **Channel Internals (hchan):** Draw a struct containing a circular buffer array, a lock (Mutex), and two linked lists (sendq, recvq). (Illustrates: Why channels are not "magic" and have lock contention).
 - [ ] **Map Bucket Layout:** Draw the internal bucket structure showing the tophash array followed by 8 keys then 8 values (K,K... V,V...). (Illustrates: Memory padding optimization and overflow pointers).
 - [ ] **The Heap vs. Stack Boundary:** Draw a stack frame for func A calling func B. Draw a variable in A being pointed to by a global variable. (Illustrates: Escape analysis—why the compiler forces that variable to the Heap).
