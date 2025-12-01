@@ -48,6 +48,7 @@
 - [x] **Manipulation:** I can use `append()` to grow a slice and `len()`/`cap()` to inspect it.
 - [x] **Construction:** I can use `make([]T, len, cap)` to initialize a slice with specific dimensions.
 - [x] **Slicing:** I can create a "view" into an existing array or slice using the `[low:high]` syntax (e.g., `s[1:4]`).
+- [x] **Standard Lib:** I use the `slices` package (Go 1.21+) for common operations (Sorting, Binary Search) instead of writing my own loops.
 
 ### L2: Optimize allocation efficiency and prevent leaks.
 - [ ] **Pre-allocation:** I can prevent performance-killing reallocation loops by pre-calculating capacity: `make([]T, 0, expectedSize)`.
@@ -147,10 +148,10 @@
 ## Defer
 
 ### L1: Clean up resources safely.
-- [ ] **Syntax:** I can register a function call to be executed when the surrounding function returns using the `defer` keyword.
-- [ ] **LIFO Order:** I understand that multiple deferred calls execute in **Last-In, First-Out** (stack) order. (e.g., `defer A; defer B` executes B, then A).
-- [ ] **Resource Management:** I immediately place `defer resource.Close()` after successfully acquiring a resource (File, Network Connection, Mutex) to prevent leaks.
-- [ ] **Scope Rule:** I understand that `defer` is bound to the **Function**, not the `{ block }`. Calling `defer` inside an `if` block or `for` loop schedules it for the _end of the function_, not the end of the block.
+- [x] **Syntax:** I can register a function call to be executed when the surrounding function returns using the `defer` keyword.
+- [x] **LIFO Order:** I understand that multiple deferred calls execute in **Last-In, First-Out** (stack) order. (e.g., `defer A; defer B` executes B, then A).
+- [x] **Resource Management:** I immediately place `defer resource.Close()` after successfully acquiring a resource (File, Network Connection, Mutex) to prevent leaks.
+- [x] **Scope Rule:** I understand that `defer` is bound to the **Function**, not the `{ block }`. Calling `defer` inside an `if` block or `for` loop schedules it for the _end of the function_, not the end of the block.
 
 ### L2: Return values and resource exhaustion.
 - [ ] **Argument Evaluation:** I know that arguments to a deferred function are evaluated **immediately** (at the `defer` statement), while the function body executes **later** (at return). I can write code that captures the correct values based on this rule.
@@ -196,10 +197,10 @@
 ## Type Aliases
 
 ### L1: Distinguish New Type vs Renamed Type.
-- [ ] **Syntax:** I know the syntactic difference between a Type Definition (`type MyInt int`) and a Type Alias (`type MyInt = int`).
-- [ ] **Identity:** I understand that an Alias is **identical** to the underlying type. I can assign a variable of type `MyInt` (alias) to a variable of type `int` without casting.
-- [ ] **New Types:** I understand that a Type Definition creates a distinct type. I know I _must_ explicitly cast (`T(val)`) to convert between the new type and the underlying type.
-- [ ] **Built-ins:** I recognize that `byte` is an alias for `uint8` and `rune` is an alias for `int32` in the standard library.
+- [x] **Syntax:** I know the syntactic difference between a Type Definition (`type MyInt int`) and a Type Alias (`type MyInt = int`).
+- [x] **Identity:** I understand that an Alias is **identical** to the underlying type. I can assign a variable of type `MyInt` (alias) to a variable of type `int` without casting.
+- [x] **New Types:** I understand that a Type Definition creates a distinct type. I know I _must_ explicitly cast (`T(val)`) to convert between the new type and the underlying type.
+- [x] **Built-ins:** I recognize that `byte` is an alias for `uint8` and `rune` is an alias for `int32` in the standard library.
 
 ### L2: Refactor without breaking downstream clients.
 - [ ] **The Refactoring Pattern:** I can move a struct from `package A` to `package B`, and leave a Type Alias in `package A` pointing to the new location. This allows existing consumers of `package A` to keep compiling while the code physically moves.
@@ -219,11 +220,10 @@
 ## Generics (Type Parameters)
 
 ### L1: Read/write basic generic functions.
-- [ ] **Syntax:** I can declare a generic function using square brackets: `func Map[T any](s []T, f func(T) T) []T`.
-- [ ] **Constraints:** I understand `any` (alias for `interface{}`) and `comparable` (types that support `==`). I know I cannot use `==` on a generic type `T` unless it is constrained by `comparable`.
-- [ ] **Instantiation:** I can call generic functions both with explicit type arguments (`Fn[int](5)`) and by relying on **Type Inference** (`Fn(5)`).
-- [ ] **Generic Structs:** I can define data structures that hold generic values, such as `type Box[T any] struct { Val T }`.
-- [ ] **Standard Lib:** I use the `slices` and `maps` packages (Go 1.21+) for common operations (Sorting, Binary Search) instead of writing my own loops.
+- [x] **Syntax:** I can declare a generic function using square brackets: `func Map[T any](s []T, f func(T) T) []T`.
+- [x] **Constraints:** I understand `any` (alias for `interface{}`) and `comparable` (types that support `==`). I know I cannot use `==` on a generic type `T` unless it is constrained by `comparable`.
+- [x] **Instantiation:** I can call generic functions both with explicit type arguments (`Fn[int](5)`) and by relying on **Type Inference** (`Fn(5)`).
+- [x] **Generic Structs:** I can define data structures that hold generic values, such as `type Box[T any] struct { Val T }`.
 
 ### L2: Reusable libraries and type approximation.
 - [ ] **Custom Constraints:** I can define interface constraints with **Type Unions** (e.g., `type Number interface { int | float64 }`) to limit valid inputs.
@@ -238,108 +238,6 @@
 - [ ] **Generics vs. Interfaces:** I can choose correctly: Use **Generics** when the _implementation_ stays the same but the data type changes (e.g., `ReverseSlice`). Use **Interfaces** when the _implementation_ changes based on the type (e.g., `generic.Save()` where SQL and Redis have different logic).
 - [ ] **Binary Size:** I monitor binary size growth. I know that overuse of Generics with many distinct "Shapes" (structs of different sizes) triggers the compiler to generate many unique function bodies, bloating the executable.
 - [ ] **Zero Values:** I can handle the "Zero Value" problem in generics. Since `return nil` doesn't work for `T` (which might be an `int`), I use `var zero T; return zero`.
-
----
-
-## SOLID Principles in Go
-
-### L1: Define principles and identify them in code.
-- [ ] **SRP (Single Responsibility):** I can refactor a "God Struct" or "God Function" into smaller, focused units. I ensure a Type handles one clear domain concept (e.g., separating `UserDB` logic from `UserJSON` formatting).
-- [ ] **OCP (Open/Closed):** I can write code that is "Open for extension, Closed for modification" by using Interfaces. I can add a new behavior (e.g., a new `PaymentMethod`) without changing the `ProcessPayment` function.
-- [ ] **LSP (Liskov Substitution):** I understand that any concrete type implementing an interface must be swappable without breaking the program.
-- [ ] **ISP (Interface Segregation):** I prefer small interfaces (`Reader`, `Writer`) over large ones (`ReadWriteCloserSeeker`). I understand that clients should not be forced to implement methods they don't use.
-- [ ] **DIP (Dependency Inversion):** I can inject dependencies (like a database connection) via an interface in a constructor (`NewService(db Database)`) rather than instantiating the concrete type inside the service.
-
-### L2: Create testable, idiomatic packages.
-- [ ] **SRP & Packages:** I apply SRP at the **Package Level**. I avoid creating a generic `utils` package and instead group code by domain cohesion (e.g., `net/http` handles HTTP, not "Networking").
-- [ ] **ISP (Consumer-Defined):** I apply the Go-specific inversion of ISP: **"Interfaces belong to the consumer."** I define the interface in the package _using_ it, not the package _providing_ it.
-- [ ] **DIP & Mocking:** I use Dependency Inversion specifically to enable easy unit testing. I generate mocks for dependencies to test business logic in isolation.
-- [ ] **OCP via Composition:** I implement OCP using Struct Embedding. I can wrap an existing type to intercept its methods or add new fields without rewriting the original type.
-- [ ] **LSP & Nil:** I ensure my interface implementations respect the contract. I avoid returning `nil` errors when the operation actually failed, and I don't implement interface methods by just `panic("not implemented")`.
-
-### L3: Prevent "Enterprise Java" patterns.
-- [ ] **The ISP Trade-off:** I actively fight "Interface Pollution." I only create an interface when I have **two or more concrete implementations** (or one implementation + one mock). I reject the pattern of "One Interface per Struct" (e.g., `UserService` vs `IUserService`) because it adds cognitive load without real decoupling.
-- [ ] **DIP & Wire Complexity:** I can weigh the cost of manual Dependency Injection vs. DI Frameworks (like Uber's `fx` or Google's `wire`). I usually prefer explicit manual wiring in `main.go` to maintain the "Go Philosophy" of transparency over magic.
-- [ ] **LSP & Behavioral Subtyping:** I validate that implementations share **Behavioral Semantics**, not just method signatures. If one `Storage` implementation allows concurrent writes and another doesn't, they violate LSP even if they satisfy the Go interface.
-- [ ] **Config vs. Code:** I use the **Functional Options Pattern** (an application of OCP) to design APIs that can accept new configuration parameters in the future without breaking the function signature for existing users.
-- [ ] **Refactoring Strategy:** I do not design for SOLID upfront (YAGNI). I write concrete code first, and **refactor to SOLID** only when the code actually changes. I treat abstraction as a cost I pay only when necessary.
-
----
-
-## Context
-
-### L1: Pass context; set basic timeouts.
-- [ ] **The First Arg:** I follow the convention of passing `ctx context.Context` as the **first argument** to functions, never embedding it in a struct (with rare exceptions).
-- [ ] **Roots:** I know when to use `context.Background()` (main, init, tests) vs. `context.TODO()` (when I'm unsure or refactoring).
-- [ ] **Deadlines:** I can use `context.WithTimeout(parent, duration)` and `context.WithDeadline(parent, time)` to ensure operations don't hang forever.
-- [ ] **Cancellation:** I can use `context.WithCancel(parent)` to create a `cancel` function, and I understand that calling it stops the context's children.
-- [ ] **Cleanup:** I strictly adhere to the rule: **Always call the `cancel` function** (often via `defer`) returned by `WithTimeout` or `WithCancel` to release resources, even if the operation succeeds.
-
-### L2: Handle cancellation; prevent leaks; safe Values.
-- [ ] **Listening for Stop:** I can implement the `select { case <-ctx.Done(): ... }` pattern inside long-running loops to ensure my goroutines actually exit when the context is canceled.
-- [ ] **Error Handling:** I check `ctx.Err()` to determine _why_ the context ended (Canceled vs. DeadlineExceeded) and return appropriate HTTP status codes (499 Client Closed Request vs 504 Gateway Timeout).
-- [ ] **Standard Lib Integration:** I use `req.Context()` in HTTP handlers and pass context to `sql` queries (`db.QueryContext`) so database operations abort when the user disconnects.
-- [ ] **Values (Keys):** I understand that `context.WithValue` is for **Request-Scoped Data** (Trace IDs, Auth Tokens), _not_ for passing optional function parameters.
-- [ ] **Key Collisions:** I prevent key collisions in `WithValue` by always using **unexported custom types** for keys, never built-in types like `string` or `int`.
-- [ ] **Go 1.20+ Causes:** I use `context.WithCancelCause` and `context.Cause(ctx)` to attach and retrieve specific errors explaining _why_ a cancellation occurred (better debugging than just "context canceled").
-
-### L3: Propagation cost and tracing topologies.
-- [ ] **Propagation Graph:** I visualize Context as an immutable tree. I understand that canceling a parent strictly cancels all children, but canceling a child does not affect the parent.
-- [ ] **AfterFunc Optimization:** I utilize `context.AfterFunc` (Go 1.21+) for efficient cleanup. I know this is more efficient than spinning up a new goroutine just to wait on `<-ctx.Done()`, as it registers a callback directly in the runtime's timer heap.
-- [ ] **Value Lookup Cost:** I understand that looking up a Value in a deep context chain is **O(N)** (linear scan up the tree). I avoid storing frequently accessed dependencies (like Loggers) deep in context chains in tight loops.
-- [ ] **Network Boundaries:** I know how to serialize context deadlines across the wire (e.g., in gRPC metadata) so that a 500ms timeout on Service A enforces a <500ms budget on downstream Service B (Deadline Propagation).
-- [ ] **Context Detachment:** I can safely "detach" a context using `WithoutCancel` (Go 1.21) when I need to fire-and-forget a cleanup task (like logging) that shouldn't be aborted just because the incoming HTTP request was canceled.
-
----
-
-## Goroutines & The Scheduler
-
-### L1: Spawn concurrent tasks and wait.
-- [ ] **Syntax:** I can start a concurrent execution using the `go` keyword (`go myFunction()`).
-- [ ] **Lifecycle:** I understand that if the `main()` function returns, the program exits immediately, killing all other running goroutines without warning.
-- [ ] **Synchronization:** I can use `sync.WaitGroup` (`Add`, `Done`, `Wait`) to ensure the main program waits for goroutines to complete.
-- [ ] **Closures:** I can wrap logic in anonymous functions (`go func() { ... }()`) to execute quick tasks without defining named functions.
-- [ ] **No Return:** I understand that a goroutine cannot "return" a value to its caller like a normal function; it must communicate results via Channels or Shared Memory.
-
-### L2: Safe concurrency; prevent crashes.
-- [ ] **Panic Isolation:** I understand that a panic inside a goroutine **crashes the entire application** unless it is recovered _inside_ that specific goroutine. (A `recover` in `main` does not catch panics in spawned goroutines).
-- [ ] **Loop Variable Capture:** I am aware of the classic "loop variable capture" bug (in Go versions < 1.22) where all goroutines printed the last index of the loop. I know how to pass arguments explicitly to the closure to fix this.
-- [ ] **The Race Detector:** I treat `go test -race` as mandatory. I do not ship code that triggers race conditions, even if "it seems to work."
-- [ ] **Goroutine Leaks:** I treat a "leaked goroutine" (one that never terminates) as a memory leak. I ensure every goroutine has a defined exit condition (usually via a Context cancellation or Channel close).
-- [ ] **Closure Detachment:** I am careful when passing pointers to local variables into goroutines, understanding that this forces those variables to **escape to the heap**.
-
-### L3: GMP model; throughput vs. latency.
-- [ ] **The GMP Model:** I can explain the Go Scheduler components: **G (Goroutine)**, **M (Machine/OS Thread)**, **P (Processor/Context)**.
-- [ ] **Context Switching Cost:** I know that switching Goroutines is cheap (~200ns, registers only) compared to switching OS Threads (~1-2µs, full kernel state). I use this to justify high-concurrency designs that would fail in Java/C++.
-- [ ] **Stack Growth:** I understand **Contiguous Stack Growth**. Goroutines start small (2KB). If they need more space, the runtime allocates a larger stack, copies data over, and updates pointers. I know this copy has a performance cost during deep recursion.
-- [ ] **Work Stealing:** I can explain how an idle P "steals" work from the local run queue of another busy P to balance the CPU load automatically.
-- [ ] **Preemption:** I understand that modern Go (1.14+) uses **Asynchronous Preemption**. The scheduler can interrupt a tight loop (that makes no function calls) to prevent one goroutine from starving others, ensuring fairness.
-- [ ] **Affinity:** I design for **Data Locality**. I know that passing data between goroutines on different OS threads incurs a cache-coherency penalty (L1/L2 cache misses), so I prefer keeping related work on the same goroutine when possible.
-
----
-
-## Synchronization Primitives (Sync & Atomic)
-
-### L1: Prevent data races.
-- [ ] **Mutex Syntax:** I can use `sync.Mutex` to protect a shared map or slice. I strictly follow the pattern: `Lock()`, perform operation, `Unlock()`.
-- [ ] **Read/Write Split:** I understand that `sync.RWMutex` allows multiple readers (`RLock`) but only one writer (`Lock`), and I use it for read-heavy workloads.
-- [ ] **WaitGroup:** I can synchronize multiple goroutines using `sync.WaitGroup`. I know the correct order: `Add(1)` _before_ starting the goroutine, and `defer Done()` _inside_ the goroutine.
-- [ ] **Atomic Counters:** I can use `atomic.AddInt64` and `atomic.LoadInt64` to maintain thread-safe counters without the overhead of a full Mutex.
-- [ ] **Race Detector:** I verify my synchronization using `go test -race` and treat any output as a critical bug.
-
-### L2: Prevent deadlocks and copying issues.
-- [ ] **Unlock Safety:** I almost always use `defer mu.Unlock()` immediately after locking to ensure the lock is released even if the function panics or returns early.
-- [ ] **Copying Forbidden:** I understand that **Mutexes must not be copied**. I pass structs containing mutexes by _pointer_, not by value, to avoid copying the lock state (which renders it useless).
-- [ ] **RWMutex Cost:** I know that `RWMutex` has higher overhead than `Mutex`. I only use it when the "Read" hold time is significant; for very quick updates, a standard `Mutex` is often faster.
-- [ ] **Atomic Types:** I use `atomic.Pointer[T]` (Go 1.19+) and `atomic.Value` to handle thread-safe configuration updates or swap pointers without raw `unsafe.Pointer` casting.
-- [ ] **WaitGroup Pitfall:** I know that passing a `WaitGroup` by value to a function copies the internal counter (breaking the logic). I always pass it by **pointer** (`*sync.WaitGroup`).
-
-### L3: Cache coherence and lock-free algorithms.
-- [ ] **Granularity Strategy:** I can choose between **Coarse-Grained Locking** (one lock for the whole struct) vs. **Fine-Grained Locking** (locks per field/shard). I justify the complexity of fine-grained locking only when profiling proves contention is a bottleneck.
-- [ ] **False Sharing:** I can identify performance degradation caused by **False Sharing** (when two atomic variables sit on the same CPU cache line but are updated by different cores). I fix this by adding padding (e.g., `_ [56]byte`) between fields.
-- [ ] **CAS Loops:** I can implement "Optimistic Locking" using `atomic.CompareAndSwap` (CAS) loops to update values without ever blocking an OS thread, reducing latency in high-contention hot paths.
-- [ ] **Mutex Internals:** I understand Go's Mutex **Starvation Mode**. I know that if a Goroutine waits >1ms for a lock, the Mutex switches modes to give priority to the tail of the wait queue, preventing tail-latency outliers.
-- [ ] **Memory Ordering:** I understand that `atomic` provides **Sequential Consistency** and "Happens-Before" edges. I do not rely on "benign data races" (reading a non-atomic boolean without a lock) because I know compiler reordering can break the logic.
 
 ---
 
@@ -370,6 +268,33 @@
 
 ---
 
+## Test-Driven Development (TDD)
+
+### L1: Basic test verification.
+- [ ] **The Cycle:** I can execute the "Red-Green-Refactor" loop: Write a failing test first, write the minimal code to pass it, then clean up.
+- [ ] **Mechanics:** I can create a valid test file (`_test.go`) and a valid test function signature `func TestName(t *testing.T)`.
+- [ ] **Assertions:** I understand that Go has no built-in `assert` library. I can write manual checks: `if got != want { t.Errorf(...) }`.
+- [ ] **Flow Control:** I know the difference between `t.Error` (log and continue) and `t.Fatal` (log and stop immediately) and when to use each.
+- [ ] **Execution:** I can run tests using `go test ./...` and `go test -v` for verbose output.
+
+### L2: Idiomatic Table-Driven Tests.
+- [ ] **Table-Driven Tests:** I can implement the "Table-Driven" pattern using a slice of structs to test multiple inputs/outputs in a single function, rather than copying/pasting assertions.
+- [ ] **Subtests:** I can use `t.Run()` inside a loop to execute subtests, allowing me to isolate failures within a table-driven test.
+- [ ] **Dependency Injection:** I can use Interfaces to inject dependencies, allowing me to swap real implementations (e.g., Database) for mocks/stubs during testing.
+- [ ] **Test Helpers:** I can use `t.Helper()` to mark utility functions, ensuring that test failures report the line number of the _caller_ (the test), not the helper function.
+- [ ] **Coverage:** I can run `go test -cover` to analyze code paths, but I understand that 100% coverage is a metric, not a goal in itself.
+- [ ] **Race Detection:** I automatically include `-race` in my test execution commands to catch concurrency bugs during the test phase.
+
+### L3: Drive architecture; validate performance.
+- [ ] **Design Pressure:** I can recognize "Test Friction" (e.g., "I need to mock 10 things to test this function") as a signal of high coupling, and I use it to justify breaking code into smaller, isolated components.
+- [ ] **Trade-off: Mocking vs. Integration:** I can decide when to use **Unit Tests** (fast, flaky with mocks) vs. **Integration Tests** (slow, reliable, Docker containers), avoiding the "Mocking Hell" anti-pattern where tests only verify the mock setup.
+- [ ] **Fuzzing:** I can implement `testing.F` (Go 1.18+) to automatically generate random edge-case inputs (bit-flips, empty strings) to crash-proof my parsers and validators.
+- [ ] **Benchmarks:** I can implement `Benchmark` functions (`func BenchmarkX(b *testing.B)`), interpret `b.ReportAllocs()`, and use the results to make data-driven optimization decisions.
+- [ ] **Golden Files:** I can implement "Golden File" testing for complex outputs (like large JSON or HTML blobs), where the test compares current output against a stored "perfect" file, rather than brittle string assertions.
+- [ ] **Black Box Testing:** I can use the `package foo_test` (external test package) pattern to enforce testing only the public API, ensuring I am not coupling tests to internal implementation details.
+
+---
+
 ## Channels & Concurrency Safety
 
 ### L1: Transmit data; identify blockers.
@@ -397,30 +322,105 @@
 
 ---
 
-## Test-Driven Development (TDD)
+## Goroutines & The Scheduler
 
-### L1: Basic test verification.
-- [ ] **The Cycle:** I can execute the "Red-Green-Refactor" loop: Write a failing test first, write the minimal code to pass it, then clean up.
-- [ ] **Mechanics:** I can create a valid test file (`_test.go`) and a valid test function signature `func TestName(t *testing.T)`.
-- [ ] **Assertions:** I understand that Go has no built-in `assert` library. I can write manual checks: `if got != want { t.Errorf(...) }`.
-- [ ] **Flow Control:** I know the difference between `t.Error` (log and continue) and `t.Fatal` (log and stop immediately) and when to use each.
-- [ ] **Execution:** I can run tests using `go test ./...` and `go test -v` for verbose output.
+### L1: Spawn concurrent tasks and wait.
+- [ ] **Syntax:** I can start a concurrent execution using the `go` keyword (`go myFunction()`).
+- [ ] **Lifecycle:** I understand that if the `main()` function returns, the program exits immediately, killing all other running goroutines without warning.
+- [ ] **Synchronization:** I can use `sync.WaitGroup` (`Add`, `Done`, `Wait`) to ensure the main program waits for goroutines to complete.
+- [ ] **Closures:** I can wrap logic in anonymous functions (`go func() { ... }()`) to execute quick tasks without defining named functions.
+- [ ] **No Return:** I understand that a goroutine cannot "return" a value to its caller like a normal function; it must communicate results via Channels or Shared Memory.
 
-### L2: Idiomatic Table-Driven Tests.
-- [ ] **Table-Driven Tests:** I can implement the "Table-Driven" pattern using a slice of structs to test multiple inputs/outputs in a single function, rather than copying/pasting assertions.
-- [ ] **Subtests:** I can use `t.Run()` inside a loop to execute subtests, allowing me to isolate failures within a table-driven test.
-- [ ] **Dependency Injection:** I can use Interfaces to inject dependencies, allowing me to swap real implementations (e.g., Database) for mocks/stubs during testing.
-- [ ] **Test Helpers:** I can use `t.Helper()` to mark utility functions, ensuring that test failures report the line number of the _caller_ (the test), not the helper function.
-- [ ] **Coverage:** I can run `go test -cover` to analyze code paths, but I understand that 100% coverage is a metric, not a goal in itself.
-- [ ] **Race Detection:** I automatically include `-race` in my test execution commands to catch concurrency bugs during the test phase.
+### L2: Safe concurrency; prevent crashes.
+- [ ] **Panic Isolation:** I understand that a panic inside a goroutine **crashes the entire application** unless it is recovered _inside_ that specific goroutine. (A `recover` in `main` does not catch panics in spawned goroutines).
+- [ ] **Loop Variable Capture:** I am aware of the classic "loop variable capture" bug (in Go versions < 1.22) where all goroutines printed the last index of the loop. I know how to pass arguments explicitly to the closure to fix this.
+- [ ] **The Race Detector:** I treat `go test -race` as mandatory. I do not ship code that triggers race conditions, even if "it seems to work."
+- [ ] **Goroutine Leaks:** I treat a "leaked goroutine" (one that never terminates) as a memory leak. I ensure every goroutine has a defined exit condition (usually via a Context cancellation or Channel close).
+- [ ] **Closure Detachment:** I am careful when passing pointers to local variables into goroutines, understanding that this forces those variables to **escape to the heap**.
 
-### L3: Drive architecture; validate performance.
-- [ ] **Design Pressure:** I can recognize "Test Friction" (e.g., "I need to mock 10 things to test this function") as a signal of high coupling, and I use it to justify breaking code into smaller, isolated components.
-- [ ] **Trade-off: Mocking vs. Integration:** I can decide when to use **Unit Tests** (fast, flaky with mocks) vs. **Integration Tests** (slow, reliable, Docker containers), avoiding the "Mocking Hell" anti-pattern where tests only verify the mock setup.
-- [ ] **Fuzzing:** I can implement `testing.F` (Go 1.18+) to automatically generate random edge-case inputs (bit-flips, empty strings) to crash-proof my parsers and validators.
-- [ ] **Benchmarks:** I can implement `Benchmark` functions (`func BenchmarkX(b *testing.B)`), interpret `b.ReportAllocs()`, and use the results to make data-driven optimization decisions.
-- [ ] **Golden Files:** I can implement "Golden File" testing for complex outputs (like large JSON or HTML blobs), where the test compares current output against a stored "perfect" file, rather than brittle string assertions.
-- [ ] **Black Box Testing:** I can use the `package foo_test` (external test package) pattern to enforce testing only the public API, ensuring I am not coupling tests to internal implementation details.
+### L3: GMP model; throughput vs. latency.
+- [ ] **The GMP Model:** I can explain the Go Scheduler components: **G (Goroutine)**, **M (Machine/OS Thread)**, **P (Processor/Context)**.
+- [ ] **Context Switching Cost:** I know that switching Goroutines is cheap (~200ns, registers only) compared to switching OS Threads (~1-2µs, full kernel state). I use this to justify high-concurrency designs that would fail in Java/C++.
+- [ ] **Stack Growth:** I understand **Contiguous Stack Growth**. Goroutines start small (2KB). If they need more space, the runtime allocates a larger stack, copies data over, and updates pointers. I know this copy has a performance cost during deep recursion.
+- [ ] **Work Stealing:** I can explain how an idle P "steals" work from the local run queue of another busy P to balance the CPU load automatically.
+- [ ] **Preemption:** I understand that modern Go (1.14+) uses **Asynchronous Preemption**. The scheduler can interrupt a tight loop (that makes no function calls) to prevent one goroutine from starving others, ensuring fairness.
+- [ ] **Affinity:** I design for **Data Locality**. I know that passing data between goroutines on different OS threads incurs a cache-coherency penalty (L1/L2 cache misses), so I prefer keeping related work on the same goroutine when possible.
+
+---
+
+## Context
+
+### L1: Pass context; set basic timeouts.
+- [ ] **The First Arg:** I follow the convention of passing `ctx context.Context` as the **first argument** to functions, never embedding it in a struct (with rare exceptions).
+- [ ] **Roots:** I know when to use `context.Background()` (main, init, tests) vs. `context.TODO()` (when I'm unsure or refactoring).
+- [ ] **Deadlines:** I can use `context.WithTimeout(parent, duration)` and `context.WithDeadline(parent, time)` to ensure operations don't hang forever.
+- [ ] **Cancellation:** I can use `context.WithCancel(parent)` to create a `cancel` function, and I understand that calling it stops the context's children.
+- [ ] **Cleanup:** I strictly adhere to the rule: **Always call the `cancel` function** (often via `defer`) returned by `WithTimeout` or `WithCancel` to release resources, even if the operation succeeds.
+
+### L2: Handle cancellation; prevent leaks; safe Values.
+- [ ] **Listening for Stop:** I can implement the `select { case <-ctx.Done(): ... }` pattern inside long-running loops to ensure my goroutines actually exit when the context is canceled.
+- [ ] **Error Handling:** I check `ctx.Err()` to determine _why_ the context ended (Canceled vs. DeadlineExceeded) and return appropriate HTTP status codes (499 Client Closed Request vs 504 Gateway Timeout).
+- [ ] **Standard Lib Integration:** I use `req.Context()` in HTTP handlers and pass context to `sql` queries (`db.QueryContext`) so database operations abort when the user disconnects.
+- [ ] **Values (Keys):** I understand that `context.WithValue` is for **Request-Scoped Data** (Trace IDs, Auth Tokens), _not_ for passing optional function parameters.
+- [ ] **Key Collisions:** I prevent key collisions in `WithValue` by always using **unexported custom types** for keys, never built-in types like `string` or `int`.
+- [ ] **Go 1.20+ Causes:** I use `context.WithCancelCause` and `context.Cause(ctx)` to attach and retrieve specific errors explaining _why_ a cancellation occurred (better debugging than just "context canceled").
+
+### L3: Propagation cost and tracing topologies.
+- [ ] **Propagation Graph:** I visualize Context as an immutable tree. I understand that canceling a parent strictly cancels all children, but canceling a child does not affect the parent.
+- [ ] **AfterFunc Optimization:** I utilize `context.AfterFunc` (Go 1.21+) for efficient cleanup. I know this is more efficient than spinning up a new goroutine just to wait on `<-ctx.Done()`, as it registers a callback directly in the runtime's timer heap.
+- [ ] **Value Lookup Cost:** I understand that looking up a Value in a deep context chain is **O(N)** (linear scan up the tree). I avoid storing frequently accessed dependencies (like Loggers) deep in context chains in tight loops.
+- [ ] **Network Boundaries:** I know how to serialize context deadlines across the wire (e.g., in gRPC metadata) so that a 500ms timeout on Service A enforces a <500ms budget on downstream Service B (Deadline Propagation).
+- [ ] **Context Detachment:** I can safely "detach" a context using `WithoutCancel` (Go 1.21) when I need to fire-and-forget a cleanup task (like logging) that shouldn't be aborted just because the incoming HTTP request was canceled.
+
+---
+
+## Synchronization Primitives (Sync & Atomic)
+
+### L1: Prevent data races.
+- [ ] **Mutex Syntax:** I can use `sync.Mutex` to protect a shared map or slice. I strictly follow the pattern: `Lock()`, perform operation, `Unlock()`.
+- [ ] **Read/Write Split:** I understand that `sync.RWMutex` allows multiple readers (`RLock`) but only one writer (`Lock`), and I use it for read-heavy workloads.
+- [ ] **WaitGroup:** I can synchronize multiple goroutines using `sync.WaitGroup`. I know the correct order: `Add(1)` _before_ starting the goroutine, and `defer Done()` _inside_ the goroutine.
+- [ ] **Atomic Counters:** I can use `atomic.AddInt64` and `atomic.LoadInt64` to maintain thread-safe counters without the overhead of a full Mutex.
+- [ ] **Race Detector:** I verify my synchronization using `go test -race` and treat any output as a critical bug.
+
+### L2: Prevent deadlocks and copying issues.
+- [ ] **Unlock Safety:** I almost always use `defer mu.Unlock()` immediately after locking to ensure the lock is released even if the function panics or returns early.
+- [ ] **Copying Forbidden:** I understand that **Mutexes must not be copied**. I pass structs containing mutexes by _pointer_, not by value, to avoid copying the lock state (which renders it useless).
+- [ ] **RWMutex Cost:** I know that `RWMutex` has higher overhead than `Mutex`. I only use it when the "Read" hold time is significant; for very quick updates, a standard `Mutex` is often faster.
+- [ ] **Atomic Types:** I use `atomic.Pointer[T]` (Go 1.19+) and `atomic.Value` to handle thread-safe configuration updates or swap pointers without raw `unsafe.Pointer` casting.
+- [ ] **WaitGroup Pitfall:** I know that passing a `WaitGroup` by value to a function copies the internal counter (breaking the logic). I always pass it by **pointer** (`*sync.WaitGroup`).
+
+### L3: Cache coherence and lock-free algorithms.
+- [ ] **Granularity Strategy:** I can choose between **Coarse-Grained Locking** (one lock for the whole struct) vs. **Fine-Grained Locking** (locks per field/shard). I justify the complexity of fine-grained locking only when profiling proves contention is a bottleneck.
+- [ ] **False Sharing:** I can identify performance degradation caused by **False Sharing** (when two atomic variables sit on the same CPU cache line but are updated by different cores). I fix this by adding padding (e.g., `_ [56]byte`) between fields.
+- [ ] **CAS Loops:** I can implement "Optimistic Locking" using `atomic.CompareAndSwap` (CAS) loops to update values without ever blocking an OS thread, reducing latency in high-contention hot paths.
+- [ ] **Mutex Internals:** I understand Go's Mutex **Starvation Mode**. I know that if a Goroutine waits >1ms for a lock, the Mutex switches modes to give priority to the tail of the wait queue, preventing tail-latency outliers.
+- [ ] **Memory Ordering:** I understand that `atomic` provides **Sequential Consistency** and "Happens-Before" edges. I do not rely on "benign data races" (reading a non-atomic boolean without a lock) because I know compiler reordering can break the logic.
+
+---
+
+## SOLID Principles in Go
+
+### L1: Define principles and identify them in code.
+- [ ] **SRP (Single Responsibility):** I can refactor a "God Struct" or "God Function" into smaller, focused units. I ensure a Type handles one clear domain concept (e.g., separating `UserDB` logic from `UserJSON` formatting).
+- [ ] **OCP (Open/Closed):** I can write code that is "Open for extension, Closed for modification" by using Interfaces. I can add a new behavior (e.g., a new `PaymentMethod`) without changing the `ProcessPayment` function.
+- [ ] **LSP (Liskov Substitution):** I understand that any concrete type implementing an interface must be swappable without breaking the program.
+- [ ] **ISP (Interface Segregation):** I prefer small interfaces (`Reader`, `Writer`) over large ones (`ReadWriteCloserSeeker`). I understand that clients should not be forced to implement methods they don't use.
+- [ ] **DIP (Dependency Inversion):** I can inject dependencies (like a database connection) via an interface in a constructor (`NewService(db Database)`) rather than instantiating the concrete type inside the service.
+
+### L2: Create testable, idiomatic packages.
+- [ ] **SRP & Packages:** I apply SRP at the **Package Level**. I avoid creating a generic `utils` package and instead group code by domain cohesion (e.g., `net/http` handles HTTP, not "Networking").
+- [ ] **ISP (Consumer-Defined):** I apply the Go-specific inversion of ISP: **"Interfaces belong to the consumer."** I define the interface in the package _using_ it, not the package _providing_ it.
+- [ ] **DIP & Mocking:** I use Dependency Inversion specifically to enable easy unit testing. I generate mocks for dependencies to test business logic in isolation.
+- [ ] **OCP via Composition:** I implement OCP using Struct Embedding. I can wrap an existing type to intercept its methods or add new fields without rewriting the original type.
+- [ ] **LSP & Nil:** I ensure my interface implementations respect the contract. I avoid returning `nil` errors when the operation actually failed, and I don't implement interface methods by just `panic("not implemented")`.
+
+### L3: Prevent "Enterprise Java" patterns.
+- [ ] **The ISP Trade-off:** I actively fight "Interface Pollution." I only create an interface when I have **two or more concrete implementations** (or one implementation + one mock). I reject the pattern of "One Interface per Struct" (e.g., `UserService` vs `IUserService`) because it adds cognitive load without real decoupling.
+- [ ] **DIP & Wire Complexity:** I can weigh the cost of manual Dependency Injection vs. DI Frameworks (like Uber's `fx` or Google's `wire`). I usually prefer explicit manual wiring in `main.go` to maintain the "Go Philosophy" of transparency over magic.
+- [ ] **LSP & Behavioral Subtyping:** I validate that implementations share **Behavioral Semantics**, not just method signatures. If one `Storage` implementation allows concurrent writes and another doesn't, they violate LSP even if they satisfy the Go interface.
+- [ ] **Config vs. Code:** I use the **Functional Options Pattern** (an application of OCP) to design APIs that can accept new configuration parameters in the future without breaking the function signature for existing users.
+- [ ] **Refactoring Strategy:** I do not design for SOLID upfront (YAGNI). I write concrete code first, and **refactor to SOLID** only when the code actually changes. I treat abstraction as a cost I pay only when necessary.
 
 ---
 
