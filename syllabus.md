@@ -144,31 +144,6 @@
 
 ---
 
-## Error Handling vs. Panics
-
-### L1: Handle errors explicitly; do not crash.
-- [ ] **Philosophy:** I understand that Go does not have `try/catch`. I accept that handling errors is a core part of the code logic, not an afterthought.
-- [ ] **Syntax:** I can implement the standard check: `if err != nil { return err }`.
-- [ ] **Creation:** I can create simple error values using `errors.New("text")` and formatted errors using `fmt.Errorf("code: %d", code)`.
-- [ ] **Panic:** I understand that `panic()` stops the ordinary flow of control and begins **Stack Unwinding**. I know it is reserved for unrecoverable states (e.g., startup configuration missing).
-- [ ] **Recover:** I know the syntax to `recover()` from a panic using a `defer` statement, though I rarely use it yet.
-
-### L2: Debuggable errors and outage prevention.
-- [ ] **Wrapping:** I use the `%w` verb (Go 1.13+) in `fmt.Errorf("context: %w", err)` to wrap errors. I understand this creates a linked list of errors (The Error Chain), preserving the root cause.
-- [ ] **Inspection (Is):** I use `errors.Is(err, target)` instead of `==` to check for specific sentinel errors (e.g., `io.EOF`), ensuring checks work even if the error is wrapped.
-- [ ] **Inspection (As):** I use `errors.As(err, &target)` to type-assert a wrapped error into a specific struct to extract fields (like a Status Code or Retry Delay).
-- [ ] **Custom Types:** I can define custom error structs (e.g., `type ValidationError struct`) to carry machine-readable data (field names, violation tags) alongside the human-readable message.
-- [ ] **Boundary Protection:** I implement "Panic Recovery Middleware" at the entry points of my application (HTTP Handlers, Queue Consumers) to ensure that a single request triggering a `nil` pointer dereference does not crash the entire server.
-
-### L3: Decoupled APIs; Panic as implementation detail.
-- [ ] **Opaque Errors:** I design APIs that return opaque errors (interfaces) rather than concrete types. I encourage callers to assert **Behavior** (e.g., `IsTemporary() bool`) rather than **Type**, minimizing coupling between packages.
-- [ ] **Internal Panic Pattern:** I can use `panic` and `recover` strictly as an **internal** implementation detail (e.g., inside a deep recursive parser) to simplify complex control flow, provided I catch it at the package boundary and return it as a standard `error`.
-- [ ] **Sentinel Overhead:** I avoid creating public Sentinel Errors (`var ErrNotFound = ...`) unless necessary, as they become part of the public API contract and are hard to deprecate.
-- [ ] **Performance & Stack Traces:** I understand that `errors.New` is cheap, but libraries that attach **Stack Traces** (like `pkg/errors`) are expensive. I decide when the debuggability of a stack trace is worth the CPU/Memory allocation cost (usually Yes for App logic, No for low-level libraries).
-- [ ] **Don't Log & Return:** I strictly enforce the rule: **"Handle it OR Return it."** I never log an error and then return it, as this floods the logs with duplicate noise up the stack.
-
----
-
 ## Defer
 
 ### L1: Clean up resources safely.
@@ -190,6 +165,31 @@
 - [ ] **Wait vs. Defer:** In extremely latency-sensitive code (Hot Paths), I have the discipline to manually `Close()` resources to save the ~30ns overhead of the defer mechanism, provided code complexity remains manageable.
 - [ ] **Exit Bypass:** I remember that `os.Exit()` terminates the program **immediately** without running deferred functions, and I design system shutdown hooks to handle this edge case.
 - [ ] **Traceability:** I use `defer` to implement "Function Tracing" (logging entry and exit times) by leveraging the immediate argument evaluation for the "Start" time and the execution for the "End" time.
+
+---
+
+## Error Handling vs. Panics
+
+### L1: Handle errors explicitly; do not crash.
+- [x] **Philosophy:** I understand that Go does not have `try/catch`. I accept that handling errors is a core part of the code logic, not an afterthought.
+- [x] **Syntax:** I can implement the standard check: `if err != nil { return err }`.
+- [x] **Creation:** I can create simple error values using `errors.New("text")` and formatted errors using `fmt.Errorf("code: %d", code)`.
+- [x] **Panic:** I understand that `panic()` stops the ordinary flow of control and begins **Stack Unwinding**. I know it is reserved for unrecoverable states (e.g., startup configuration missing).
+- [x] **Recover:** I know the syntax to `recover()` from a panic using a `defer` statement.
+
+### L2: Debuggable errors and outage prevention.
+- [ ] **Wrapping:** I use the `%w` verb (Go 1.13+) in `fmt.Errorf("context: %w", err)` to wrap errors. I understand this creates a linked list of errors (The Error Chain), preserving the root cause.
+- [ ] **Inspection (Is):** I use `errors.Is(err, target)` instead of `==` to check for specific sentinel errors (e.g., `io.EOF`), ensuring checks work even if the error is wrapped.
+- [ ] **Inspection (As):** I use `errors.As(err, &target)` to type-assert a wrapped error into a specific struct to extract fields (like a Status Code or Retry Delay).
+- [ ] **Custom Types:** I can define custom error structs (e.g., `type ValidationError struct`) to carry machine-readable data (field names, violation tags) alongside the human-readable message.
+- [ ] **Boundary Protection:** I implement "Panic Recovery Middleware" at the entry points of my application (HTTP Handlers, Queue Consumers) to ensure that a single request triggering a `nil` pointer dereference does not crash the entire server.
+
+### L3: Decoupled APIs; Panic as implementation detail.
+- [ ] **Opaque Errors:** I design APIs that return opaque errors (interfaces) rather than concrete types. I encourage callers to assert **Behavior** (e.g., `IsTemporary() bool`) rather than **Type**, minimizing coupling between packages.
+- [ ] **Internal Panic Pattern:** I can use `panic` and `recover` strictly as an **internal** implementation detail (e.g., inside a deep recursive parser) to simplify complex control flow, provided I catch it at the package boundary and return it as a standard `error`.
+- [ ] **Sentinel Overhead:** I avoid creating public Sentinel Errors (`var ErrNotFound = ...`) unless necessary, as they become part of the public API contract and are hard to deprecate.
+- [ ] **Performance & Stack Traces:** I understand that `errors.New` is cheap, but libraries that attach **Stack Traces** (like `pkg/errors`) are expensive. I decide when the debuggability of a stack trace is worth the CPU/Memory allocation cost (usually Yes for App logic, No for low-level libraries).
+- [ ] **Don't Log & Return:** I strictly enforce the rule: **"Handle it OR Return it."** I never log an error and then return it, as this floods the logs with duplicate noise up the stack.
 
 ---
 
