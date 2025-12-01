@@ -122,10 +122,9 @@
 ## Garbage Collection (GC)
 
 ### L1: Memory is managed automatically but not infinite.
-- [ ] **Concept:** I understand the difference between **Stack** (fast, automatic cleanup per function) and **Heap** (slower, GC-managed).
-- [ ] **Lifecycle:** I understand that variables created in a function "live" until they are no longer referenced, at which point the GC reclaims them.
-- [ ] **Leaks:** I understand that "Memory Leaks" in Go are usually logical errors (e.g., forgetting to remove an item from a long-lived Map or Slice) rather than unmanaged memory.
-- [ ] **Basic Tooling:** I can run `go test -bench . -benchmem` to see the number of allocations per operation (`allocs/op`).
+- [x] **Concept:** I understand the difference between **Stack** (fast, automatic cleanup per function) and **Heap** (slower, GC-managed).
+- [x] **Lifecycle:** I understand that variables created in a function "live" until they are no longer referenced, at which point the GC reclaims them.
+- [x] **Leaks:** I understand that "Memory Leaks" in Go are usually logical errors (e.g., forgetting to remove an item from a long-lived Map or Slice) rather than unmanaged memory.
 
 ### L2: Reduce GC pressure and monitor health.
 - [ ] **GOGC Tuning:** I can configure the `GOGC` environment variable (default 100) to trade memory usage for CPU usage (e.g., raising it to 200 reduces GC frequency but doubles heap size).
@@ -145,51 +144,28 @@
 
 ---
 
-## SOLID Principles in Go
+## Error Handling vs. Panics
 
-### L1: Define principles and identify them in code.
-- [ ] **SRP (Single Responsibility):** I can refactor a "God Struct" or "God Function" into smaller, focused units. I ensure a Type handles one clear domain concept (e.g., separating `UserDB` logic from `UserJSON` formatting).
-- [ ] **OCP (Open/Closed):** I can write code that is "Open for extension, Closed for modification" by using Interfaces. I can add a new behavior (e.g., a new `PaymentMethod`) without changing the `ProcessPayment` function.
-- [ ] **LSP (Liskov Substitution):** I understand that any concrete type implementing an interface must be swappable without breaking the program.
-- [ ] **ISP (Interface Segregation):** I prefer small interfaces (`Reader`, `Writer`) over large ones (`ReadWriteCloserSeeker`). I understand that clients should not be forced to implement methods they don't use.
-- [ ] **DIP (Dependency Inversion):** I can inject dependencies (like a database connection) via an interface in a constructor (`NewService(db Database)`) rather than instantiating the concrete type inside the service.
+### L1: Handle errors explicitly; do not crash.
+- [ ] **Philosophy:** I understand that Go does not have `try/catch`. I accept that handling errors is a core part of the code logic, not an afterthought.
+- [ ] **Syntax:** I can implement the standard check: `if err != nil { return err }`.
+- [ ] **Creation:** I can create simple error values using `errors.New("text")` and formatted errors using `fmt.Errorf("code: %d", code)`.
+- [ ] **Panic:** I understand that `panic()` stops the ordinary flow of control and begins **Stack Unwinding**. I know it is reserved for unrecoverable states (e.g., startup configuration missing).
+- [ ] **Recover:** I know the syntax to `recover()` from a panic using a `defer` statement, though I rarely use it yet.
 
-### L2: Create testable, idiomatic packages.
-- [ ] **SRP & Packages:** I apply SRP at the **Package Level**. I avoid creating a generic `utils` package and instead group code by domain cohesion (e.g., `net/http` handles HTTP, not "Networking").
-- [ ] **ISP (Consumer-Defined):** I apply the Go-specific inversion of ISP: **"Interfaces belong to the consumer."** I define the interface in the package _using_ it, not the package _providing_ it.
-- [ ] **DIP & Mocking:** I use Dependency Inversion specifically to enable easy unit testing. I generate mocks for dependencies to test business logic in isolation.
-- [ ] **OCP via Composition:** I implement OCP using Struct Embedding. I can wrap an existing type to intercept its methods or add new fields without rewriting the original type.
-- [ ] **LSP & Nil:** I ensure my interface implementations respect the contract. I avoid returning `nil` errors when the operation actually failed, and I don't implement interface methods by just `panic("not implemented")`.
+### L2: Debuggable errors and outage prevention.
+- [ ] **Wrapping:** I use the `%w` verb (Go 1.13+) in `fmt.Errorf("context: %w", err)` to wrap errors. I understand this creates a linked list of errors (The Error Chain), preserving the root cause.
+- [ ] **Inspection (Is):** I use `errors.Is(err, target)` instead of `==` to check for specific sentinel errors (e.g., `io.EOF`), ensuring checks work even if the error is wrapped.
+- [ ] **Inspection (As):** I use `errors.As(err, &target)` to type-assert a wrapped error into a specific struct to extract fields (like a Status Code or Retry Delay).
+- [ ] **Custom Types:** I can define custom error structs (e.g., `type ValidationError struct`) to carry machine-readable data (field names, violation tags) alongside the human-readable message.
+- [ ] **Boundary Protection:** I implement "Panic Recovery Middleware" at the entry points of my application (HTTP Handlers, Queue Consumers) to ensure that a single request triggering a `nil` pointer dereference does not crash the entire server.
 
-### L3: Prevent "Enterprise Java" patterns.
-- [ ] **The ISP Trade-off:** I actively fight "Interface Pollution." I only create an interface when I have **two or more concrete implementations** (or one implementation + one mock). I reject the pattern of "One Interface per Struct" (e.g., `UserService` vs `IUserService`) because it adds cognitive load without real decoupling.
-- [ ] **DIP & Wire Complexity:** I can weigh the cost of manual Dependency Injection vs. DI Frameworks (like Uber's `fx` or Google's `wire`). I usually prefer explicit manual wiring in `main.go` to maintain the "Go Philosophy" of transparency over magic.
-- [ ] **LSP & Behavioral Subtyping:** I validate that implementations share **Behavioral Semantics**, not just method signatures. If one `Storage` implementation allows concurrent writes and another doesn't, they violate LSP even if they satisfy the Go interface.
-- [ ] **Config vs. Code:** I use the **Functional Options Pattern** (an application of OCP) to design APIs that can accept new configuration parameters in the future without breaking the function signature for existing users.
-- [ ] **Refactoring Strategy:** I do not design for SOLID upfront (YAGNI). I write concrete code first, and **refactor to SOLID** only when the code actually changes. I treat abstraction as a cost I pay only when necessary.
-
----
-
-## Type Aliases
-
-### L1: Distinguish New Type vs Renamed Type.
-- [ ] **Syntax:** I know the syntactic difference between a Type Definition (`type MyInt int`) and a Type Alias (`type MyInt = int`).
-- [ ] **Identity:** I understand that an Alias is **identical** to the underlying type. I can assign a variable of type `MyInt` (alias) to a variable of type `int` without casting.
-- [ ] **New Types:** I understand that a Type Definition creates a distinct type. I know I _must_ explicitly cast (`T(val)`) to convert between the new type and the underlying type.
-- [ ] **Built-ins:** I recognize that `byte` is an alias for `uint8` and `rune` is an alias for `int32` in the standard library.
-
-### L2: Refactor without breaking downstream clients.
-- [ ] **The Refactoring Pattern:** I can move a struct from `package A` to `package B`, and leave a Type Alias in `package A` pointing to the new location. This allows existing consumers of `package A` to keep compiling while the code physically moves.
-- [ ] **Method Constraints:** I understand the **"Orphan Rule."** I know I cannot define _new_ methods on an alias if the underlying type is defined in a different package. (Methods must be defined in the same package as the type definition).
-- [ ] **Embedding Behavior:** I understand that embedding an Alias into a struct promotes the methods of the _original_ type.
-- [ ] **Exporting:** I can use aliases to "re-export" a type from an internal sub-package to a public API surface, keeping the implementation hidden while the interface is public.
-
-### L3: Migration strategies and domain boundaries.
-- [ ] **Safety vs. Convenience:** I can decide when to use a **New Type** to prevent logic errors (e.g., `type Password string` prevents accidentally logging a password as a generic string) vs. when to use an **Alias** for interoperability.
-- [ ] **Gradual Code Repair:** I can design a multi-phase architectural migration: 1. Move type. 2. Alias old location. 3. Deprecate alias. 4. Remove alias.
-- [ ] **Documentation Impact:** I understand how `go doc` treats aliases. I know that aliases often obscure the "source of truth" in generated documentation, and I weigh this cognitive load against the ease of refactoring.
-- [ ] **C-Interop:** I use aliases to map Go types to C types (e.g., `type CInt = C.int`) inside cgo applications to abstract platform-specific width differences while maintaining strict type compatibility.
-- [ ] **Generic Constraints:** (Go 1.18+) I can use aliases to simplify complex Generic Type constraints (e.g., `type Number = interface { int | float64 ... }`) to make function signatures readable.
+### L3: Decoupled APIs; Panic as implementation detail.
+- [ ] **Opaque Errors:** I design APIs that return opaque errors (interfaces) rather than concrete types. I encourage callers to assert **Behavior** (e.g., `IsTemporary() bool`) rather than **Type**, minimizing coupling between packages.
+- [ ] **Internal Panic Pattern:** I can use `panic` and `recover` strictly as an **internal** implementation detail (e.g., inside a deep recursive parser) to simplify complex control flow, provided I catch it at the package boundary and return it as a standard `error`.
+- [ ] **Sentinel Overhead:** I avoid creating public Sentinel Errors (`var ErrNotFound = ...`) unless necessary, as they become part of the public API contract and are hard to deprecate.
+- [ ] **Performance & Stack Traces:** I understand that `errors.New` is cheap, but libraries that attach **Stack Traces** (like `pkg/errors`) are expensive. I decide when the debuggability of a stack trace is worth the CPU/Memory allocation cost (usually Yes for App logic, No for low-level libraries).
+- [ ] **Don't Log & Return:** I strictly enforce the rule: **"Handle it OR Return it."** I never log an error and then return it, as this floods the logs with duplicate noise up the stack.
 
 ---
 
@@ -214,6 +190,29 @@
 - [ ] **Wait vs. Defer:** In extremely latency-sensitive code (Hot Paths), I have the discipline to manually `Close()` resources to save the ~30ns overhead of the defer mechanism, provided code complexity remains manageable.
 - [ ] **Exit Bypass:** I remember that `os.Exit()` terminates the program **immediately** without running deferred functions, and I design system shutdown hooks to handle this edge case.
 - [ ] **Traceability:** I use `defer` to implement "Function Tracing" (logging entry and exit times) by leveraging the immediate argument evaluation for the "Start" time and the execution for the "End" time.
+
+---
+
+## Type Aliases
+
+### L1: Distinguish New Type vs Renamed Type.
+- [ ] **Syntax:** I know the syntactic difference between a Type Definition (`type MyInt int`) and a Type Alias (`type MyInt = int`).
+- [ ] **Identity:** I understand that an Alias is **identical** to the underlying type. I can assign a variable of type `MyInt` (alias) to a variable of type `int` without casting.
+- [ ] **New Types:** I understand that a Type Definition creates a distinct type. I know I _must_ explicitly cast (`T(val)`) to convert between the new type and the underlying type.
+- [ ] **Built-ins:** I recognize that `byte` is an alias for `uint8` and `rune` is an alias for `int32` in the standard library.
+
+### L2: Refactor without breaking downstream clients.
+- [ ] **The Refactoring Pattern:** I can move a struct from `package A` to `package B`, and leave a Type Alias in `package A` pointing to the new location. This allows existing consumers of `package A` to keep compiling while the code physically moves.
+- [ ] **Method Constraints:** I understand the **"Orphan Rule."** I know I cannot define _new_ methods on an alias if the underlying type is defined in a different package. (Methods must be defined in the same package as the type definition).
+- [ ] **Embedding Behavior:** I understand that embedding an Alias into a struct promotes the methods of the _original_ type.
+- [ ] **Exporting:** I can use aliases to "re-export" a type from an internal sub-package to a public API surface, keeping the implementation hidden while the interface is public.
+
+### L3: Migration strategies and domain boundaries.
+- [ ] **Safety vs. Convenience:** I can decide when to use a **New Type** to prevent logic errors (e.g., `type Password string` prevents accidentally logging a password as a generic string) vs. when to use an **Alias** for interoperability.
+- [ ] **Gradual Code Repair:** I can design a multi-phase architectural migration: 1. Move type. 2. Alias old location. 3. Deprecate alias. 4. Remove alias.
+- [ ] **Documentation Impact:** I understand how `go doc` treats aliases. I know that aliases often obscure the "source of truth" in generated documentation, and I weigh this cognitive load against the ease of refactoring.
+- [ ] **C-Interop:** I use aliases to map Go types to C types (e.g., `type CInt = C.int`) inside cgo applications to abstract platform-specific width differences while maintaining strict type compatibility.
+- [ ] **Generic Constraints:** (Go 1.18+) I can use aliases to simplify complex Generic Type constraints (e.g., `type Number = interface { int | float64 ... }`) to make function signatures readable.
 
 ---
 
@@ -242,28 +241,28 @@
 
 ---
 
-## Error Handling vs. Panics
+## SOLID Principles in Go
 
-### L1: Handle errors explicitly; do not crash.
-- [ ] **Philosophy:** I understand that Go does not have `try/catch`. I accept that handling errors is a core part of the code logic, not an afterthought.
-- [ ] **Syntax:** I can implement the standard check: `if err != nil { return err }`.
-- [ ] **Creation:** I can create simple error values using `errors.New("text")` and formatted errors using `fmt.Errorf("code: %d", code)`.
-- [ ] **Panic:** I understand that `panic()` stops the ordinary flow of control and begins **Stack Unwinding**. I know it is reserved for unrecoverable states (e.g., startup configuration missing).
-- [ ] **Recover:** I know the syntax to `recover()` from a panic using a `defer` statement, though I rarely use it yet.
+### L1: Define principles and identify them in code.
+- [ ] **SRP (Single Responsibility):** I can refactor a "God Struct" or "God Function" into smaller, focused units. I ensure a Type handles one clear domain concept (e.g., separating `UserDB` logic from `UserJSON` formatting).
+- [ ] **OCP (Open/Closed):** I can write code that is "Open for extension, Closed for modification" by using Interfaces. I can add a new behavior (e.g., a new `PaymentMethod`) without changing the `ProcessPayment` function.
+- [ ] **LSP (Liskov Substitution):** I understand that any concrete type implementing an interface must be swappable without breaking the program.
+- [ ] **ISP (Interface Segregation):** I prefer small interfaces (`Reader`, `Writer`) over large ones (`ReadWriteCloserSeeker`). I understand that clients should not be forced to implement methods they don't use.
+- [ ] **DIP (Dependency Inversion):** I can inject dependencies (like a database connection) via an interface in a constructor (`NewService(db Database)`) rather than instantiating the concrete type inside the service.
 
-### L2: Debuggable errors and outage prevention.
-- [ ] **Wrapping:** I use the `%w` verb (Go 1.13+) in `fmt.Errorf("context: %w", err)` to wrap errors. I understand this creates a linked list of errors (The Error Chain), preserving the root cause.
-- [ ] **Inspection (Is):** I use `errors.Is(err, target)` instead of `==` to check for specific sentinel errors (e.g., `io.EOF`), ensuring checks work even if the error is wrapped.
-- [ ] **Inspection (As):** I use `errors.As(err, &target)` to type-assert a wrapped error into a specific struct to extract fields (like a Status Code or Retry Delay).
-- [ ] **Custom Types:** I can define custom error structs (e.g., `type ValidationError struct`) to carry machine-readable data (field names, violation tags) alongside the human-readable message.
-- [ ] **Boundary Protection:** I implement "Panic Recovery Middleware" at the entry points of my application (HTTP Handlers, Queue Consumers) to ensure that a single request triggering a `nil` pointer dereference does not crash the entire server.
+### L2: Create testable, idiomatic packages.
+- [ ] **SRP & Packages:** I apply SRP at the **Package Level**. I avoid creating a generic `utils` package and instead group code by domain cohesion (e.g., `net/http` handles HTTP, not "Networking").
+- [ ] **ISP (Consumer-Defined):** I apply the Go-specific inversion of ISP: **"Interfaces belong to the consumer."** I define the interface in the package _using_ it, not the package _providing_ it.
+- [ ] **DIP & Mocking:** I use Dependency Inversion specifically to enable easy unit testing. I generate mocks for dependencies to test business logic in isolation.
+- [ ] **OCP via Composition:** I implement OCP using Struct Embedding. I can wrap an existing type to intercept its methods or add new fields without rewriting the original type.
+- [ ] **LSP & Nil:** I ensure my interface implementations respect the contract. I avoid returning `nil` errors when the operation actually failed, and I don't implement interface methods by just `panic("not implemented")`.
 
-### L3: Decoupled APIs; Panic as implementation detail.
-- [ ] **Opaque Errors:** I design APIs that return opaque errors (interfaces) rather than concrete types. I encourage callers to assert **Behavior** (e.g., `IsTemporary() bool`) rather than **Type**, minimizing coupling between packages.
-- [ ] **Internal Panic Pattern:** I can use `panic` and `recover` strictly as an **internal** implementation detail (e.g., inside a deep recursive parser) to simplify complex control flow, provided I catch it at the package boundary and return it as a standard `error`.
-- [ ] **Sentinel Overhead:** I avoid creating public Sentinel Errors (`var ErrNotFound = ...`) unless necessary, as they become part of the public API contract and are hard to deprecate.
-- [ ] **Performance & Stack Traces:** I understand that `errors.New` is cheap, but libraries that attach **Stack Traces** (like `pkg/errors`) are expensive. I decide when the debuggability of a stack trace is worth the CPU/Memory allocation cost (usually Yes for App logic, No for low-level libraries).
-- [ ] **Don't Log & Return:** I strictly enforce the rule: **"Handle it OR Return it."** I never log an error and then return it, as this floods the logs with duplicate noise up the stack.
+### L3: Prevent "Enterprise Java" patterns.
+- [ ] **The ISP Trade-off:** I actively fight "Interface Pollution." I only create an interface when I have **two or more concrete implementations** (or one implementation + one mock). I reject the pattern of "One Interface per Struct" (e.g., `UserService` vs `IUserService`) because it adds cognitive load without real decoupling.
+- [ ] **DIP & Wire Complexity:** I can weigh the cost of manual Dependency Injection vs. DI Frameworks (like Uber's `fx` or Google's `wire`). I usually prefer explicit manual wiring in `main.go` to maintain the "Go Philosophy" of transparency over magic.
+- [ ] **LSP & Behavioral Subtyping:** I validate that implementations share **Behavioral Semantics**, not just method signatures. If one `Storage` implementation allows concurrent writes and another doesn't, they violate LSP even if they satisfy the Go interface.
+- [ ] **Config vs. Code:** I use the **Functional Options Pattern** (an application of OCP) to design APIs that can accept new configuration parameters in the future without breaking the function signature for existing users.
+- [ ] **Refactoring Strategy:** I do not design for SOLID upfront (YAGNI). I write concrete code first, and **refactor to SOLID** only when the code actually changes. I treat abstraction as a cost I pay only when necessary.
 
 ---
 
